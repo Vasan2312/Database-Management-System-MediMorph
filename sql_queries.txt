@@ -1,0 +1,82 @@
+OLAP 
+
+USE mydb;
+SELECT
+IF(GROUPING(employee_shift), 'ALL SHIFTS',employee_shift) AS EMPLOYEE_SHIFT,
+IF(GROUPING(s_delivery_time), 'ALL TIME',s_delivery_time) AS DELIVERY_TIME,
+COUNT(*) AS NUMBER_OF_EMPLOYEES
+FROM management,supplier
+WHERE management.employee_id = supplier.employee_id
+GROUP BY employee_shift,s_delivery_time WITH ROLLUP;
+
+USE mydb;
+SELECT
+IF(GROUPING(m_name), 'ALL MEDICINES WITH THE NAME',m_name) AS MEDICINE_NAME,
+IF(GROUPING(m_expiry_data),'ALL EXPIRY MEDICINES',m_expiry_data) AS EXPIRY_DATE,
+SUM(m_quantity*m_price) AS TOTAL_PRICE
+FROM medicine
+GROUP BY m_name, m_expiry_data WITH ROLLUP;
+
+USE mydb;
+SELECT
+IF(GROUPING(state), 'ALL STATES',state) AS STATE_OF_PEOPLE,
+IF(GROUPING(p_date_joined),'ALL DATES',p_date_joined) AS DATE_JOINED,
+COUNT(*) AS TOTAL_COUNTING
+FROM patient
+GROUP BY state, p_date_joined WITH ROLLUP;
+
+USE mydb;
+SELECT
+IF(GROUPING(employee_shift), 'ALL SHIFTS',employee_shift) AS SHIFT,
+COUNT(*) AS COUNTING
+FROM management
+GROUP BY employee_shift WITH ROLLUP;
+
+USE mydb;
+SELECT
+IF(GROUPING(user_id), 'ALL USERS',user_id) AS USER_ID,
+IF(GROUPING(type), 'ALL TYPES',type) AS TYPE_OF_SERVICE,
+SUM(quantity) AS TOTAL_QUANTITY
+FROM order_history
+GROUP BY user_id,type WITH ROLLUP;
+
+
+TRIGGERS
+
+DROP TRIGGER IF EXISTS trigger1;
+CREATE TRIGGER trigger1
+BEFORE INSERT ON medicine
+FOR EACH ROW
+IF NEW.m_quantity>=100 THEN
+SET NEW.m_price = NEW.m_price*0.5;
+END IF;
+
+DROP TRIGGER IF EXISTS trigger2;
+CREATE TRIGGER trigger2
+BEFORE INSERT ON supplier
+FOR EACH ROW
+BEGIN
+IF NEW.s_delivery_time>=5 THEN
+        IF NEW.s_prices>300 THEN
+SET NEW.s_prices = 300;
+END IF;
+END IF;
+END;
+
+EMBEDDED QUERIES:
+
+1.
+insert into medicine (medicine_id, m_storage_temp, m_concentration, m_name, m_price, m_expiry_data, m_recommended_dosage, m_quantity, supplier_id, employee_id) values ({m_id},{m_st},{m_c},'{m_n}',{m_p},'{m_ed}',{m_re},{m_q},{m_s},{m_e})
+
+2.
+DELETE FROM medicine WHERE medicine_id = {m_id}
+
+3.
+insert into supplier (supplier_id, s_delivery_charge,s_delivery_time, s_location, s_prices, employee_id) values ({supplier_id}, {s_delivery_charge},{s_delivery_time}, {s_location}, {s_price}, {employee_id})
+
+4.
+SELECT * FROM MANAGEMENT WHERE employee_id = %s AND employee_name = %s
+
+5.
+SELECT IF(GROUPING(employee_shift), 'ALL SHIFTS',employee_shift) AS EMPLOYEE_SHIFT, IF(GROUPING(s_delivery_time), 'ALL TIME',s_delivery_time) AS DELIVERY_TIME, COUNT(*) AS NUMBER_OF_EMPLOYEES FROM management,supplier WHERE management.employee_id = supplier.employee_id GROUP BY employee_shift,s_delivery_time WITH ROLLUP;
+

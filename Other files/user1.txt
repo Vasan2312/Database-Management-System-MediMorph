@@ -1,0 +1,150 @@
+-- SQLBook: Code
+-- conflicting 1
+use mydb ; 
+start transaction ; 
+
+savepoint one ; 
+insert into management (employee_id, employee_name, employee_shift, employee_phone) 
+values (
+    110, 'Utkarsh', 'morning', '+12345'
+    );
+
+commit ; 
+-- SQLBook: Code
+-- conflicting 2 
+
+use mydb ;
+
+start transaction ;
+
+savepoint one ;
+update medicine 
+set m_quantity = m_quantity -5 
+where medicine_id = 1; 
+
+commit ; 
+-- SQLBook: Code
+-- conflicting 3 
+use mydb ;
+
+start transaction ;
+
+savepoint one ;
+update medicine 
+set m_concentration = 500
+where medicine_id = 100; 
+
+commit ; 
+-- SQLBook: Code
+-- non conflicting 1 
+
+use mydb ;
+
+start transaction ;
+
+insert into management (employee_id, employee_name, employee_shift, employee_phone) 
+values (
+    111, 'Vasan', 'morning', '+12345'
+);
+
+savepoint one ; 
+
+select * from management
+where employee_name = 'Vasan'; 
+
+
+commit ; 
+-- SQLBook: Code
+-- non conflicting 2 
+
+use mydb ;
+
+start transaction ;
+
+select * from medicine 
+where medicine_id = 1;
+
+commit ; 
+-- SQLBook: Code
+-- non conflicting 3
+use mydb ;
+
+start transaction ;
+
+savepoint one ;
+update medicine 
+set m_concentration = 1
+where medicine_id = 50; 
+
+savepoint two ;
+update medicine 
+set m_concentration = 1
+where medicine_id = 51; 
+
+savepoint three ;
+update medicine 
+set m_concentration = 1
+where medicine_id = 52; 
+rollback to savepoint three ; 
+commit ; 
+-- SQLBook: Code
+-- conflicting 4 
+
+use mydb ;
+start transaction ;
+update doctor 
+set d_name = "Vasan"
+where doctor_id = 5;
+commit ; 
+-- SQLBook: Code
+-- non conflicting 4
+
+use mydb ;
+start transaction ;
+update doctor 
+set d_name = "Dari"
+where doctor_id = 6;
+
+update doctor 
+set d_name = "Raman"
+where doctor_id = 8;
+commit ; 
+
+
+-- SQLBook: Code
+
+-- SQLBook: Code
+
+-- SQLBook: Code
+
+
+
+
+
+
+
+-- ---------------------------------------------------------------------------------
+
+use mydb ;  
+SET autocommit = 1;
+start transaction ;  
+update doctor 
+set d_fees = d_fees + 1000 
+where doctor_id = 50;
+commit ; 
+
+
+
+
+use mydb ; 
+SET autocommit = 1;
+
+start transaction ; 
+update medicine 
+set m_quantity = m_quantity - 5
+where medicine_id = 2;
+
+update `Get Lab Tests`
+set `Get Lab Tests`.glt_fasting_time  = `Get Lab Tests`.glt_fasting_time - 40 
+where `Get Lab Tests`.get_lab_test_id = 1 ;
+commit ; 

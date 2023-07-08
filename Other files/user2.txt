@@ -1,0 +1,121 @@
+-- SQLBook: Code
+-- conflicting 1 
+use mydb ; 
+start transaction ; 
+savepoint two ; 
+
+insert into supplier(supplier_id , s_delivery_charge , s_delivery_time , s_location  , s_prices , employee_id) 
+values (
+    199 , 100 , 3 , 'IIIT Delhi' , 1000 , 110
+) ; 
+
+rollback ; 
+ 
+-- SQLBook: Code
+-- conflicting 2 
+use mydb ; 
+start transaction ;
+
+savepoint two ;
+update medicine
+set m_quantity = m_quantity + 10 
+where medicine_id = 1 ;
+
+commit ; 
+-- SQLBook: Code
+-- conflicting 3 
+use mydb ; 
+start transaction ;
+
+savepoint two ;
+delete from medicine
+where medicine_id = 100 ;
+
+-- rollback to savepoint two ; 
+commit ; 
+-- SQLBook: Code
+
+-- SQLBook: Code
+-- non conflicting 2 
+
+use mydb ;
+
+start transaction ;
+
+select * from medicine 
+where medicine_id = 5;
+
+commit ; 
+-- SQLBook: Code
+-- non conflicting 3  
+use mydb ;
+
+start transaction ;
+
+savepoint one ;
+update doctor 
+set d_fees = 1000
+where doctor_id = 50; 
+
+savepoint two ;
+update doctor 
+set d_fees = 1000
+where doctor_id = 51; 
+
+savepoint three ;
+update doctor 
+set d_fees = 1000
+where doctor_id = 52; 
+
+commit ; 
+-- SQLBook: Code
+-- conflicting 4 
+
+use mydb ;
+update doctor 
+set d_experience = 0
+where doctor_id = 5;
+
+commit ; 
+
+-- SQLBook: Code
+-- non conflicting 5
+
+use mydb ;
+start transaction ;
+update doctor 
+set d_name = "Pankaj"
+where doctor_id = 7;
+commit ; 
+
+
+
+
+
+
+
+
+
+-- ---------------------------------------------------------------------------------
+use mydb ;  
+SET autocommit = 1;
+start transaction ;  
+update doctor 
+set d_fees = d_fees + 5000 
+where doctor_id = 50;
+commit ; 
+
+use mydb ; 
+SET autocommit = 1;
+
+start transaction ; 
+update medicine 
+set m_quantity = m_quantity + 10
+where medicine_id = 2;
+
+update `Get Lab Tests`
+set `Get Lab Tests`.glt_fasting_time  = `Get Lab Tests`.glt_fasting_time + 10 
+where `Get Lab Tests`.get_lab_test_id = 1 ; 
+
+select * from `Doctor`
+commit ; 
